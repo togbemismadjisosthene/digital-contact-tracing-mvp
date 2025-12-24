@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: contact-tracing-server
+    env: node
+    plan: free
+    branch: main
+    root: server
+    buildCommand: cd .. && npm install && npm run build
+    startCommand: npm start
