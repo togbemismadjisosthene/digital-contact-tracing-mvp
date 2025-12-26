@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
+const API_BASE = process.env.REACT_APP_API_BASE || `${window.location.origin}/api`;
 
 function getToken() {
   return localStorage.getItem('ct_token');
@@ -42,11 +42,13 @@ async function request(path, options = {}) {
 }
 
 async function signup({ username, password, role }) {
-  const data = await request('/auth/signup', { method: 'POST', body: JSON.stringify({ username, password, role }) });
-  if (data.token) setToken(data.token);
-  if (data.user) setCurrentUser(data.user);
-  return data;
+  // Create account ONLY — no auto login
+  return await request('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ username, password, role })
+  });
 }
+
 
 async function login({ username, password }) {
   const data = await request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) });
