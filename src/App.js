@@ -167,7 +167,7 @@ function App() {
 
           <Route path="/login" element={!isAuthed ? <div className="auth-page"><div className="auth-container"><Login onLogin={handleLogin} switchToSignup={() => navigate('/signup')} /></div></div> : <Navigate to={isAdmin ? '/admin' : '/member'} replace />} />
 
-          <Route path="/signup" element={!isAuthed ? <div className="auth-page"><div className="auth-container"><Signup onSignup={handleLogin} switchToLogin={() => navigate('/login')} /></div></div> : <Navigate to={isAdmin ? '/admin' : '/member'} replace />} />
+          <Route path="/signup" element={!isAuthed ? <div className="auth-page"><div className="auth-container"><Signup switchToLogin={() => navigate('/login')} /></div></div> : <Navigate to={isAdmin ? '/admin' : '/member'} replace />} />
 
           <Route path="/member" element={isAuthed ? (isAdmin ? <Navigate to="/admin/dashboard" replace /> : <section className="App-container dashboard"><div className="card card-custom"><div className="card-body"><MemberDashboard currentUser={user} /></div></div></section>) : <Navigate to="/login" replace />} />
 
