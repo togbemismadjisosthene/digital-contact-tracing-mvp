@@ -1,13 +1,2 @@
 nohup: ignoring input
 Server listening on port 5002
-Error: username exists
-    at Object.createUser (/home/student25/Desktop/MVP_APP/server/in_memory_store.js:19:55)
-    at /home/student25/Desktop/MVP_APP/server/routes/auth.js:25:32
-    at Layer.handle [as handle_request] (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/layer.js:95:5)
-    at next (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/route.js:149:13)
-    at Route.dispatch (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/route.js:119:3)
-    at Layer.handle [as handle_request] (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/layer.js:95:5)
-    at /home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/index.js:284:15
-    at router.process_params (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/index.js:346:12)
-    at next (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/index.js:280:10)
-    at router.handle (/home/student25/Desktop/MVP_APP/server/node_modules/express/lib/router/index.js:175:3)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signup, logout } from '../utils/api';
 
 export default function Signup({ switchToLogin }) {
@@ -45,6 +45,11 @@ export default function Signup({ switchToLogin }) {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    // Defensive: clear any existing session when arriving on the signup page
+    try { logout(); } catch (e) { /* ignore */ }
+  }, []);
 
   return (
     <div className="auth-form-wrapper">
