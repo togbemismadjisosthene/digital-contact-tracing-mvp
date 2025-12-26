@@ -23,8 +23,8 @@ router.post('/signup', async (req, res) => {
     if (!process.env.DATABASE_URL && store) {
       // in-memory fallback - force member role
       const user = await store.createUser({ username, password, role: 'member' });
-      const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.JWT_SECRET || 'change_this_secret', { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
-      return res.json({ token, user });
+      // Do NOT auto-issue a token on signup. Require explicit login.
+      return res.status(201).json({ user });
     }
     const existing = await db.query('SELECT id FROM users WHERE username=$1', [username]);
     if (existing.rows.length) return res.status(400).json({ error: 'username exists' });
@@ -34,9 +34,9 @@ router.post('/signup', async (req, res) => {
       'INSERT INTO users (username, password_hash, role, created_at) VALUES ($1,$2,$3,NOW()) RETURNING id, username, role',
       [username, hash, 'member']
     );
-    const user = result.rows[0];
-    const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, process.env.JWT_SECRET || 'change_this_secret', { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
-    res.json({ token, user });
+  const user = result.rows[0];
+  // Do NOT auto-issue a token on signup. Require explicit login.
+  res.status(201).json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'server error' });
