@@ -59,6 +59,7 @@ async function login({ username, password }) {
 
 function logout() {
   localStorage.removeItem('ct_token');
+  localStorage.removeItem('ct_user');
 }
 
 async function getUsers() {

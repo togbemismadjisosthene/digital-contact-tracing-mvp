@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signup } from '../utils/api';
+import { signup, logout } from '../utils/api';
 
 export default function Signup({ switchToLogin }) {
   const [username, setUsername] = useState('');
@@ -31,7 +31,9 @@ export default function Signup({ switchToLogin }) {
       });
 
       // Redirect user to Login page
-      switchToLogin();
+        // Clear any existing local session to avoid accidental auto-login
+        try { logout(); } catch (e) { /* ignore */ }
+        switchToLogin();
 
     } catch (err) {
       if (err.networkError) {
