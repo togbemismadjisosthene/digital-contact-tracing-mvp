@@ -1,2 +1,4 @@
 nohup: ignoring input
-Server listening on port 5002
+Server listening on port 4000
+Error: ENOENT: no such file or directory, stat '/home/student25/Desktop/MVP_APP/build/index.html'
+Error: ENOENT: no such file or directory, stat '/home/student25/Desktop/MVP_APP/build/index.html'
