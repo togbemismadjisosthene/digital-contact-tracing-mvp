@@ -178,7 +178,11 @@ function App() {
       </main>
 
       <footer className="site-footer text-center">
-        © 2025 Digital Contact Tracing App — Academic Project 5. All rights reserved. For academic and educational use only.
+        <div className="footer-inner App-container">
+          <div className="footer-center">
+            © 2025 Digital Contact Tracing App — Academic Project 5. All rights reserved. For academic and educational use only.
+          </div>
+        </div>
       </footer>
     </div>
   );

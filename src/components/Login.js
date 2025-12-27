@@ -26,9 +26,7 @@ export default function Login({ onLogin, switchToSignup }) {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-form-wrapper">
+    <div className="auth-form-wrapper">
       <div className="card card-auth">
         <div className="card-body p-4 p-md-5">
           {/* Header */}
@@ -129,7 +127,5 @@ export default function Login({ onLogin, switchToSignup }) {
         </div>
       </div>
     </div>
-  </div>
-</div>
   );
 }

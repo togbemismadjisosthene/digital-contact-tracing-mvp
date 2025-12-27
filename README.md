@@ -110,7 +110,9 @@ In a new terminal:
 npm start
 ```
 
-The app will open at `http://localhost:3000`
+The app will open at `http://localhost:3000` in development (when running the React dev server with `npm start`).
+
+Note: if you build the frontend (`npm run build`) and let the backend serve the production build (the server serves files from the `build/` directory), then open the backend URL (for example `http://localhost:4000/`) to access the app in production.
 
 ### 6. Create Your First Account
 
@@ -192,6 +194,7 @@ demoapp/
 
 ### Authentication (`/api/auth`)
 - `POST /api/auth/signup` - Create new account
+   - NOTE: As of the latest update, `POST /api/auth/signup` returns HTTP 201 and the created user object, but does NOT issue a JWT token. Users must explicitly log in via `POST /api/auth/login` to receive a token. This prevents accidental auto-login after signup.
 - `POST /api/auth/login` - Login and get JWT token
 - `GET /api/auth/me` - Get current user (requires auth)
 - `GET /api/auth/users` - List all users (public, for dropdowns)
@@ -243,6 +246,22 @@ demoapp/
 - `JWT_SECRET` - Secret key for JWT signing
 - `JWT_EXPIRES_IN` - Token expiration (default: `7d`)
 - `PORT` - Server port (default: `4000`)
+
+### Recent changes (important — December 2025)
+
+- Signup no longer issues a JWT: `POST /api/auth/signup` returns 201 + `{ user }` and does NOT return `{ token }`. The frontend now redirects new users to `/login` after account creation and clears any local session cache. This is intentional — users must explicitly authenticate.
+- `server/.env.example` was added to document required backend environment variables (copy to `server/.env` locally for testing).
+- `render.yaml` and a `postinstall` script in `server/package.json` were added to support single-service deployment on Render. The `postinstall` installs root/frontend deps and runs `npm run build` so the backend can serve the `build/` directory.
+- `server/index.js` now serves static files from the `build/` directory when present (Express `static` + catch-all to `index.html`).
+
+If you deploy to Render using the provided `render.yaml`, set the service root to `server`, and configure these environment variables in the Render dashboard:
+
+- `DATABASE_URL` - Postgres connection string
+- `JWT_SECRET` - strong random string for JWT signing
+- `JWT_EXPIRES_IN` - e.g. `7d`
+- `NODE_ENV=production`
+
+See `DEPLOYMENT_GUIDE.md` for a full Render-specific workflow and troubleshooting notes.
 
 ### Fallback Mode
 

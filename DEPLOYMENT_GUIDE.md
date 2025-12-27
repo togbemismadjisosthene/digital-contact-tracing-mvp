@@ -217,6 +217,33 @@ Example quick steps to deploy on Render UI:
 
 ## Troubleshooting
 
+## Accessing the app in production (backend serves the build)
+
+If you prefer a single-process production deployment where the Express backend serves the React build, follow these steps locally to test the production setup:
+
+1. From the project root, install dependencies and build the frontend:
+
+```bash
+npm install
+npm run build
+```
+
+2. Start the backend which will serve the files from `build/`:
+
+```bash
+cd server
+# set PORT if you want a specific port locally
+PORT=4000 NODE_ENV=production npm start
+```
+
+3. Open the backend URL in your browser (e.g. `http://localhost:4000/`). The server will serve `build/index.html` and the app will make API calls to the same origin under `/api/...`.
+
+Notes:
+- On Render the assigned port is provided in `process.env.PORT`; the server reads `process.env.PORT || 4000`, so you don't need to set `PORT` manually when the app is deployed to Render.
+- The `postinstall` in `server/package.json` (used by the included `render.yaml`) runs the frontend build automatically during deployment so the service will have a `build/` directory to serve.
+- If you previously set `REACT_APP_API_BASE` for local development, remove or override it in production — the built app will default to `window.location.origin + '/api'`.
+
+
 ### Database Connection Issues
 ```bash
 # Test PostgreSQL connection
