@@ -157,9 +157,10 @@ export default function AdminDashboard({ currentUser }) {
         </div>
       )}
 
-      <section>
-        <div className="card card-custom mb-3 centered-card">
-          <div className="card-body">
+      <div className="grid-2">
+        <main>
+          <div className="card card-custom mb-3">
+            <div className="card-body">
             <div className="mb-3">
               <h5 className="card-title mb-1">Report a confirmed case</h5>
               <div className="card-subtitle text-muted small">Select the confirmed individual and (optionally) provide the confirmation date. This action records a reported case for tracing.</div>
@@ -206,72 +207,89 @@ export default function AdminDashboard({ currentUser }) {
             <div className="mt-3">
               <div className="small text-muted">Using default privacy-preserving notification message. Admin cannot edit the message here.</div>
             </div>
+            </div>
           </div>
-        </div>
-      </section>
 
-      <section className="mb-3">
-        <div className="card card-custom mb-3">
-          <div className="card-body">
-            <h5 className="card-title mb-3">All interactions</h5>
-            {loading && <div className="text-muted">Loading interactions…</div>}
-            {!loading && interactions.length === 0 && <div className="text-muted">No interactions recorded yet.</div>}
-            {!loading && interactions.length > 0 && (
-              <div className="table-responsive">
-                <table className="table table-sm table-striped">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>When</th>
-                      <th>User</th>
-                      <th>Contact</th>
-                      <th>Duration (min)</th>
-                      <th>Notes</th>
-                      <th>Recorded</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {interactions.map(i => (
-                      <tr key={i.id}>
-                        <td>{i.id}</td>
-                        <td>{formatWhen(i.when_ts || i.when)}</td>
-                        <td>{usernameForId(i.user_id)}</td>
-                        <td>{usernameForId(i.contact_user_id)}</td>
-                        <td>{i.duration_minutes ?? i.durationMinutes ?? 0}</td>
-                        <td>{i.notes || ''}</td>
-                        <td>{formatWhen(i.created_at)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <section className="mb-3">
+            <div className="card card-custom mb-3">
+              <div className="card-body">
+                <h5 className="card-title mb-3">All interactions</h5>
+                {loading && <div className="text-muted">Loading interactions…</div>}
+                {!loading && interactions.length === 0 && <div className="text-muted">No interactions recorded yet.</div>}
+                {!loading && interactions.length > 0 && (
+                  <div className="table-responsive">
+                    <table className="table table-sm table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>When</th>
+                          <th>User</th>
+                          <th>Contact</th>
+                          <th>Duration (min)</th>
+                          <th>Notes</th>
+                          <th>Recorded</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {interactions.map(i => (
+                          <tr key={i.id}>
+                            <td>{i.id}</td>
+                            <td>{formatWhen(i.when_ts || i.when)}</td>
+                            <td>{usernameForId(i.user_id)}</td>
+                            <td>{usernameForId(i.contact_user_id)}</td>
+                            <td>{i.duration_minutes ?? i.durationMinutes ?? 0}</td>
+                            <td>{i.notes || ''}</td>
+                            <td>{formatWhen(i.created_at)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      </section>
+            </div>
+          </section>
+        </main>
 
-      <section className="mb-3">
+        <aside>
+          <div className="stat-card mb-3">
+            <h3>Quick actions</h3>
+            <p>Report cases, trace contacts, and simulate notifications using the tools on this page.</p>
+          </div>
+
+          <div className="panel mb-3">
+            <div className="panel-body">
+              <h6 className="mb-1">Reported cases ({cases.length})</h6>
+              {loading && <div className="text-muted">Loading cases…</div>}
+              {!loading && cases.length === 0 && <div className="text-muted">No cases reported yet.</div>}
+              {!loading && cases.length > 0 && (
+                <ul className="list-group">
+                  {cases.map(c => <li key={c.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{c.username || c.user_id}</strong>
+                      <div className="small text-muted">Reported at {formatWhen(c.reported_at)}</div>
+                    </div>
+                    <span className="badge bg-danger-subtle text-danger">#{c.id}</span>
+                  </li>)}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-body">
+              <h6 className="mb-1">Account</h6>
+              <div className="small text-muted">Signed in as <strong>{currentUser.username}</strong></div>
+              <div className="small text-muted">Role: <strong>{currentUser.role}</strong></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      
+      {/** Trace results area below main grid **/}
+      <section className="mt-4">
         <TraceResults results={results} onSimulate={simulateNotification} />
-      </section>
-
-      <section className="mb-3">
-        <div className="d-flex justify-content-between align-items-center mb-2">
-          <h5 className="mb-0">Reported cases</h5>
-          <span className="badge bg-light text-dark">{cases.length}</span>
-        </div>
-        {loading && <div className="text-muted">Loading cases…</div>}
-        {!loading && cases.length === 0 && <div className="text-muted">No cases reported yet.</div>}
-        {!loading && cases.length > 0 && (
-          <ul className="list-group">
-            {cases.map(c => <li key={c.id} className="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{c.username || c.user_id}</strong>
-                <div className="small text-muted">Reported at {formatWhen(c.reported_at)}</div>
-              </div>
-              <span className="badge bg-danger-subtle text-danger">#{c.id}</span>
-            </li>)}
-          </ul>
-        )}
       </section>
     </div>
   );

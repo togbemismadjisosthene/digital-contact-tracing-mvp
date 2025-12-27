@@ -25,6 +25,36 @@
   padding: 0;
 }
 
+/* Two column responsive grid used in dashboards */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+@media (max-width: 992px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* Small stat/summary card */
+.stat-card {
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  box-shadow: 0 6px 20px rgba(15,23,42,0.04);
+  border: 1px solid rgba(15,23,42,0.04);
+}
+.stat-card h3 { margin: 0; font-size: 20px; color: #0f172a; }
+.stat-card p { margin: 6px 0 0 0; color: #6b7280; font-size: 13px; }
+
+.panel {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,0.04);
+}
+.panel .panel-body { padding: 18px; }
+
+.user-badge { display:inline-flex; gap:8px; align-items:center; background:#f1f5f9; padding:6px 10px; border-radius:999px; font-weight:600; }
+
 .card-custom {
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(15,23,42,0.08);
