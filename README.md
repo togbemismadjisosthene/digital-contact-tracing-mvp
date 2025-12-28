@@ -1,313 +1,316 @@
 # Digital Contact Tracing Web App (Form-Based)
 
-A privacy-first, form-based contact tracing system designed for closed communities (e.g., university campuses, workplaces). This MVP enables organizations to log and manage close contacts through secure, user-reported interaction data without relying on GPS or Bluetooth tracking.
+A privacy-first, form-based contact tracing system designed for closed communities (e.g., university campuses, workplaces).
+This MVP enables organizations to log and manage close contacts through secure, user-reported interaction data **without relying on GPS or Bluetooth tracking**.
+
+---
 
 ## 🎯 Project Overview
 
 This application assists organizations in:
-- **Logging Interactions**: Community members voluntarily log their close interactions with other known users
-- **Case Reporting**: Authorized administrators can mark users as confirmed cases
-- **Contact Tracing**: Administrators can trace primary contacts who interacted with reported cases
-- **Privacy Protection**: Uses only form-based data entry (no location tracking)
+
+* **Logging Interactions**: Community members voluntarily log close interactions with other known users
+* **Case Reporting**: Authorized administrators can mark users as confirmed cases
+* **Contact Tracing**: Administrators can trace primary contacts who interacted with reported cases
+* **Privacy Protection**: Uses only form-based data entry (no location tracking)
+
+---
 
 ## ✨ Key Features
 
 ### For Community Members
-- ✅ Secure sign up/login with JWT authentication
-- ✅ Simple form to log interactions (Who, When, Duration, Notes)
-- ✅ View personal interaction history
-- ✅ Privacy-focused: Only see interactions involving themselves
+
+* ✅ Secure sign up and login with JWT authentication
+* ✅ Simple form to log interactions (Who, When, Duration, Notes)
+* ✅ View personal interaction history
+* ✅ Privacy-focused: users only see their own data
 
 ### For Administrators
-- ✅ Secure admin dashboard with role-based access control
-- ✅ Report confirmed cases
-- ✅ Trace primary contacts for any reported case
-- ✅ Configurable time window for contact tracing (default: 14 days)
-- ✅ Simulate notifications to primary contacts
-- ✅ View all reported cases with audit trail
+
+* ✅ Secure admin dashboard with role-based access control
+* ✅ Report confirmed cases
+* ✅ Trace primary contacts for any reported case
+* ✅ Configurable time window for contact tracing (default: 14 days)
+* ✅ Simulate notifications to primary contacts
+* ✅ View all reported cases with audit trail
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React.js with Bootstrap 5
-- **Backend**: Node.js with Express
-- **Database**: PostgreSQL (with proper indexing for efficient queries)
-- **Authentication**: JWT (JSON Web Tokens) with bcrypt password hashing
-- **Security**: Role-based access control (RBAC) with middleware protection
+* **Frontend**: React.js (Create React App) + Bootstrap 5
+* **Backend**: Node.js with Express
+* **Database**: PostgreSQL (**optional**)
+* **Authentication**: JWT (JSON Web Tokens) with bcrypt password hashing
+* **Security**: Role-Based Access Control (RBAC)
+
+---
 
 ## 📋 Prerequisites
 
-- Node.js (v14 or higher)
-- PostgreSQL (v12 or higher)
-- npm or yarn
+### Required
 
-## 🚀 Quick Start
+* Node.js (v14 or higher)
+* npm or yarn
 
-### 1. Clone and Install Dependencies
+### Optional
+
+* PostgreSQL (v12 or higher)
+
+> ⚠️ PostgreSQL is **NOT mandatory**.
+> The application can run in **two distinct modes** explained below.
+
+---
+
+# 🚀 How to Run the Project
+
+## 🅰️ MODE A — Run WITHOUT PostgreSQL (In-Memory Mode)
+
+✔ No PostgreSQL installation required
+✔ Ideal for **quick testing, demos, and academic evaluation**
+✔ Backend uses an **in-memory data store**
+
+⚠️ **All data is lost when the server restarts**
+
+---
+
+### Steps (Mode A)
+
+#### 1. Clone the repository
 
 ```bash
-# Install frontend dependencies
-npm install
+git clone https://github.com/togbemismadjisosthene/digital-contact-tracing-mvp.git
+cd MVP_APP
+```
 
-# Install backend dependencies
+#### 2. Install dependencies
+
+```bash
+npm install
 cd server
 npm install
 cd ..
 ```
 
-### 2. Database Setup
+#### 3. Do NOT install PostgreSQL
 
-Create a PostgreSQL database and apply the schema:
+#### 4. Do NOT create `server/.env`
 
-```bash
-# Create database
-createdb contact_tracing
-
-# Apply schema
-psql -d contact_tracing -f server/schema.sql
-```
-
-Alternatively, use the provided setup script:
+#### 5. Start backend
 
 ```bash
 cd server
-chmod +x setup_postgres_and_schema.sh
-./setup_postgres_and_schema.sh
+npm start
 ```
 
-### 3. Configure Environment Variables
+Backend API:
 
-Create a `.env` file in the `server/` directory:
+```
+http://localhost:4000/api
+```
+
+#### 6. Start frontend (new terminal)
+
+```bash
+npm start
+```
+
+Frontend:
+
+```
+http://localhost:3000
+```
+
+✅ The application works immediately.
+
+---
+
+## 🅱️ MODE B — Run WITH PostgreSQL (Persistent Mode – Recommended)
+
+✔ Data is persistent
+✔ Recommended for serious testing and deployment
+✔ Required for production use
+
+---
+
+### 1. Install PostgreSQL
+
+#### Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+```
+
+#### macOS
+
+```bash
+brew install postgresql
+brew services start postgresql
+```
+
+---
+
+### 2. Create database and user
+
+```bash
+sudo -u postgres psql
+```
+
+```sql
+CREATE DATABASE contact_tracing;
+CREATE USER ct_user WITH PASSWORD 'ct_pass';
+GRANT ALL PRIVILEGES ON DATABASE contact_tracing TO ct_user;
+\q
+```
+
+---
+
+### 3. Create tables
+
+```bash
+psql -U ct_user -d contact_tracing
+```
+
+```sql
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'member',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE interactions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  contact_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  when_ts TIMESTAMP NOT NULL,
+  duration_minutes INTEGER,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_interactions_user ON interactions(user_id);
+CREATE INDEX idx_interactions_contact ON interactions(contact_user_id);
+CREATE INDEX idx_interactions_when ON interactions(when_ts);
+
+CREATE TABLE cases (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  reported_by INTEGER REFERENCES users(id),
+  reported_at TIMESTAMP DEFAULT NOW(),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+```sql
+\q
+```
+
+---
+
+### 4. Configure environment variables
+
+Create `server/.env`:
 
 ```bash
 cd server
 cat > .env << EOF
-DATABASE_URL=postgresql://username:password@localhost:5432/contact_tracing
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
+DATABASE_URL=postgresql://ct_user:ct_pass@localhost:5432/contact_tracing
+JWT_SECRET=change_this_secret
 JWT_EXPIRES_IN=7d
 PORT=4000
 EOF
 ```
 
-**⚠️ Security Note**: Change `JWT_SECRET` to a strong, random string in production!
+---
 
-### 4. Start the Backend Server
+### 5. Start servers (Mode B)
+
+#### Backend
 
 ```bash
 cd server
 npm start
-# or for development with auto-reload:
-npm run dev
 ```
 
-The API will be available at `http://localhost:4000/api`
-
-### 5. Start the Frontend
-
-In a new terminal:
+#### Frontend (new terminal)
 
 ```bash
-# From project root
 npm start
 ```
 
-The app will open at `http://localhost:3000` in development (when running the React dev server with `npm start`).
+Frontend:
 
-Note: if you build the frontend (`npm run build`) and let the backend serve the production build (the server serves files from the `build/` directory), then open the backend URL (for example `http://localhost:4000/`) to access the app in production.
+```
+http://localhost:3000
+```
 
-### 6. Create Your First Account
+---
 
-1. Click "Sign up" on the homepage
-2. Choose a username and password
-3. Select your role:
-   - **Member**: For logging interactions
-   - **Administrator**: For case reporting and tracing
+## 🔐 Authentication Notes (Important)
+
+* `POST /api/auth/signup`
+
+  * Creates a user
+  * ❌ Does **NOT** issue a JWT token
+
+* Users must explicitly log in via `/login`
+
+This prevents accidental auto-login after signup.
+
+---
 
 ## 📁 Project Structure
 
 ```
-demoapp/
-├── public/                 # Static assets
+MVP_APP/
+├── public/
 ├── src/
-│   ├── components/        # React components
-│   │   ├── Login.js       # Login form
-│   │   ├── Signup.js      # Signup form
-│   │   ├── MemberDashboard.js    # Member interface
-│   │   ├── AdminDashboard.js     # Admin interface
-│   │   ├── InteractionForm.js    # Interaction logging form
-│   │   └── TraceResults.js       # Contact tracing results
+│   ├── components/
 │   ├── utils/
-│   │   ├── api.js         # API client functions
-│   │   └── storage.js     # LocalStorage utilities (fallback)
-│   ├── App.js             # Main app component
-│   └── App.css            # Application styles
+│   ├── App.js
+│   └── App.css
 ├── server/
 │   ├── routes/
-│   │   ├── auth.js        # Authentication endpoints
-│   │   ├── interactions.js # Interaction endpoints
-│   │   └── admin.js       # Admin endpoints (protected)
 │   ├── middleware/
-│   │   └── auth.js         # JWT authentication middleware
-│   ├── db.js              # PostgreSQL connection pool
-│   ├── schema.sql         # Database schema
-│   └── index.js           # Express server entry point
-├── DATA_POLICY.md         # Privacy and data policy
-└── README.md              # This file
+│   ├── db.js
+│   ├── schema.sql
+│   └── index.js
+├── build/                # Production build (optional)
+├── DATA_POLICY.md
+├── DEPLOYMENT_GUIDE.md
+└── README.md
 ```
-
-## 🔐 Security Features
-
-- **JWT Authentication**: Secure token-based sessions
-- **Password Hashing**: bcrypt with 10 rounds
-- **Role-Based Access Control**: Strict separation between Members and Administrators
-- **Protected Endpoints**: Admin routes require authentication + admin role
-- **SQL Injection Prevention**: Parameterized queries
-- **CORS Configuration**: Configured for development/production
-
-## 📊 Database Schema
-
-### Users Table
-- `id` (SERIAL PRIMARY KEY)
-- `username` (TEXT UNIQUE)
-- `password_hash` (TEXT) - bcrypt hashed
-- `role` (TEXT) - 'member' or 'admin'
-- `created_at` (TIMESTAMP)
-
-### Interactions Table
-- `id` (SERIAL PRIMARY KEY)
-- `user_id` (INTEGER) - References users(id)
-- `contact_user_id` (INTEGER) - References users(id)
-- `when_ts` (TIMESTAMP) - Interaction timestamp
-- `duration_minutes` (INTEGER)
-- `notes` (TEXT) - Optional notes
-- `created_at` (TIMESTAMP)
-
-**Indexes**: Created on `user_id`, `contact_user_id`, and `when_ts` for efficient queries
-
-### Cases Table
-- `id` (SERIAL PRIMARY KEY)
-- `user_id` (INTEGER) - References users(id)
-- `reported_by` (INTEGER) - References users(id) - Admin who reported
-- `reported_at` (TIMESTAMP)
-- `created_at` (TIMESTAMP)
-
-## 🔄 API Endpoints
-
-### Authentication (`/api/auth`)
-- `POST /api/auth/signup` - Create new account
-   - NOTE: As of the latest update, `POST /api/auth/signup` returns HTTP 201 and the created user object, but does NOT issue a JWT token. Users must explicitly log in via `POST /api/auth/login` to receive a token. This prevents accidental auto-login after signup.
-- `POST /api/auth/login` - Login and get JWT token
-- `GET /api/auth/me` - Get current user (requires auth)
-- `GET /api/auth/users` - List all users (public, for dropdowns)
-
-### Interactions (`/api/interactions`)
-- `POST /api/interactions` - Log new interaction (requires auth)
-- `GET /api/interactions` - Get interactions (requires auth, filtered by role)
-
-### Admin (`/api/admin`) - **Admin only**
-- `POST /api/admin/cases` - Report a confirmed case
-- `GET /api/admin/cases` - List all reported cases
-- `POST /api/admin/trace` - Trace primary contacts for a case
-- `GET /api/admin/users` - List all users with details
-
-## 🧪 Testing the Application
-
-### Test Flow
-
-1. **Create Test Accounts**:
-   - Create a member account (e.g., "alice")
-   - Create an admin account (e.g., "admin")
-
-2. **Log Interactions** (as member):
-   - Login as a member
-   - Log interactions with other users
-   - View your interaction history
-
-3. **Report Case** (as admin):
-   - Login as admin
-   - Select a user from the dropdown
-   - Click "Report case"
-
-4. **Trace Contacts** (as admin):
-   - Select the same user
-   - Set time window (default: 14 days)
-   - Click "Find primary contacts"
-   - Review the list of primary contacts
-   - Use "Simulate notification" to test notification flow
-
-## 📝 Development Notes
-
-### Environment Variables
-
-**Frontend** (optional):
-- `REACT_APP_API_BASE` - API base URL (default: `http://localhost:4000/api`)
-
-**Backend** (required):
-- `DATABASE_URL` - PostgreSQL connection string
-- `JWT_SECRET` - Secret key for JWT signing
-- `JWT_EXPIRES_IN` - Token expiration (default: `7d`)
-- `PORT` - Server port (default: `4000`)
-
-### Recent changes (important — December 2025)
-
-- Signup no longer issues a JWT: `POST /api/auth/signup` returns 201 + `{ user }` and does NOT return `{ token }`. The frontend now redirects new users to `/login` after account creation and clears any local session cache. This is intentional — users must explicitly authenticate.
-- `server/.env.example` was added to document required backend environment variables (copy to `server/.env` locally for testing).
-- `render.yaml` and a `postinstall` script in `server/package.json` were added to support single-service deployment on Render. The `postinstall` installs root/frontend deps and runs `npm run build` so the backend can serve the `build/` directory.
-- `server/index.js` now serves static files from the `build/` directory when present (Express `static` + catch-all to `index.html`).
-
-If you deploy to Render using the provided `render.yaml`, set the service root to `server`, and configure these environment variables in the Render dashboard:
-
-- `DATABASE_URL` - Postgres connection string
-- `JWT_SECRET` - strong random string for JWT signing
-- `JWT_EXPIRES_IN` - e.g. `7d`
-- `NODE_ENV=production`
-
-See `DEPLOYMENT_GUIDE.md` for a full Render-specific workflow and troubleshooting notes.
-
-### Fallback Mode
-
-If `DATABASE_URL` is not set, the server will use an in-memory store (for development/testing only). This is **not recommended** for production.
-
-## 🚨 Production Deployment Checklist
-
-- [ ] Set strong `JWT_SECRET` environment variable
-- [ ] Use HTTPS for all communications
-- [ ] Configure proper CORS origins
-- [ ] Set up database backups
-- [ ] Implement rate limiting on API endpoints
-- [ ] Enable request logging and monitoring
-- [ ] Review and update `DATA_POLICY.md`
-- [ ] Conduct security audit
-- [ ] Set up error tracking (e.g., Sentry)
-- [ ] Configure environment-specific variables
-
-## 📄 License & Data Policy
-
-See [DATA_POLICY.md](./DATA_POLICY.md) for detailed information about:
-- Privacy-first design principles
-- Data collection and storage
-- Access control and security
-- Data retention policies
-- Compliance considerations
-
-## 🤝 Contributing
-
-This is a demo/MVP project. For production use:
-1. Conduct thorough security review
-2. Implement additional features (secondary contacts, location fields, etc.)
-3. Add comprehensive test coverage
-4. Set up CI/CD pipeline
-5. Implement proper logging and monitoring
-
-## 📞 Support
-
-For questions or issues:
-- Review the [DATA_POLICY.md](./DATA_POLICY.md) for privacy concerns
-- Check server logs for API errors
-- Verify database connection and schema
-- Ensure environment variables are properly set
 
 ---
 
-**Built for**: Privacy-first contact tracing in closed communities  
-**Version**: MVP (Minimum Viable Product)  
-**Status**: Demo/Development - Requires security review before production use
+## 🧪 Testing Flow
+
+1. Create a **member** account
+2. Create an **admin** account
+3. Log interactions as member
+4. Report a case as admin
+5. Trace contacts
+
+---
+
+## ⚠️ Important Notes
+
+* PostgreSQL is **optional**
+* Mode A works instantly (no database)
+* Mode B enables persistence
+* This project is an **academic MVP / demo**
+
+---
+
+## 📄 License & Data Policy
+
+See `DATA_POLICY.md` for privacy and data handling details.
+
+---
+
+**Built for**: Privacy-first contact tracing in closed communities
+**Version**: MVP (Minimum Viable Product)
+**Status**: Demo / Academic Project
