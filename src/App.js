@@ -115,8 +115,8 @@ function App() {
           {notifications.map(n => (
             <div key={n.id} className="alert alert-warning alert-dismissible d-flex justify-content-between align-items-start" role="alert">
               <div>
-                <strong>Exposure notification (simulation)</strong>
-                <div className="small">{n.message || 'You may have had recent exposure. Follow public health guidance.'}</div>
+                <strong>Primary Contact Notification</strong>
+                <div className="small">{n.message || 'Hello, this is the Epidemiology Prevention Center. You have been identified as a primary contact following contact tracing analysis. Please monitor your health closely and follow the recommended public health measures.'}</div>
               </div>
               <div className="ms-3">
                 <button className="btn btn-sm btn-outline-secondary" onClick={() => handleMarkRead(n.id)}>Dismiss</button>

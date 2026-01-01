@@ -37,20 +37,37 @@ router.post('/notification-templates', authMiddleware, adminOnly, async (req, re
 
 // POST /api/admin/simulate-notify - admin triggers a simulated notification to a user
 router.post('/simulate-notify', authMiddleware, adminOnly, async (req, res) => {
-  const { userId, caseId, message } = req.body;
-  if (!userId) return res.status(400).json({ error: 'userId required' });
+  const { userId, caseId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'userId required' });
+  }
+
   try {
     if (store) {
-      const rec = await store.addNotification({ user_id: userId, message: message || null, simulated_by: req.user.id, case_id: caseId || null });
+      const finalMessage =
+        "Hello, this is the Epidemiology Prevention Center. You have been identified as a primary contact following contact tracing analysis. Please monitor your health closely and follow the recommended public health measures.";
+
+      const rec = await store.addNotification({
+        user_id: userId,
+        message: finalMessage,
+        simulated_by: req.user.id,
+        case_id: caseId || null
+      });
+
       return res.json({ ok: true, notification: rec });
     }
-    // DB-backed mode not implemented for this demo
-    return res.status(501).json({ error: 'simulate-notify not implemented for DB mode in this demo' });
+
+    return res.status(501).json({
+      error: 'simulate-notify not implemented for DB mode in this demo'
+    });
+
   } catch (err) {
     console.error('Simulate notify error', err);
-    res.status(500).json({ error: 'server error' });
+    return res.status(500).json({ error: 'server error' });
   }
 });
+
 
 // POST /api/admin/cases - report a case (admin)
 router.post('/cases', authMiddleware, adminOnly, async (req, res) => {
